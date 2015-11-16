@@ -17,7 +17,7 @@ running:
 
 .. code:: bash
 
-    pip install --upgrade --process-dependency-links https://github.com/matrix-org/synapse/tarball/master
+    pip install --upgrade --process-dependency-links https://github.com/makeandship/synapse/tarball/master
 
 If synapse was installed using git then upgrade to the latest version by
 running:
