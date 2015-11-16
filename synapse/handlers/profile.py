@@ -151,6 +151,55 @@ class ProfileHandler(BaseHandler):
         )
 
         yield self._update_join_states(target_user)
+        
+    @defer.inlineCallbacks
+    def set_trustname(self, target_user, auth_user, new_trustname):
+        """target_user is the user whose trustname is to be changed;
+        auth_user is the user attempting to make this change."""
+        if not self.hs.is_mine(target_user):
+            raise SynapseError(400, "User is not hosted on this Home Server")
+
+        if target_user != auth_user:
+            raise AuthError(400, "Cannot set another user's trustname")
+
+        yield self.store.set_profile_trustname(
+            target_user.localpart, new_trustname
+        )
+
+        yield self.distributor.fire(
+            "changed_presencelike_data", target_user, {
+                "trustname": new_trustname,
+            }
+        )
+
+        yield self._update_join_states(target_user)  
+        
+    @defer.inlineCallbacks
+    def get_trustname(self, target_user):
+        if self.hs.is_mine(target_user):
+            avatar_url = yield self.store.get_profile_trustname(
+                target_user.localpart
+            )
+
+            defer.returnValue(trustname)
+        else:
+            try:
+                result = yield self.federation.make_query(
+                    destination=target_user.domain,
+                    query_type="profile",
+                    args={
+                        "user_id": target_user.to_string(),
+                        "field": "trustname",
+                    }
+                )
+            except CodeMessageException as e:
+                if e.code != 404:
+                    logger.exception("Failed to get trustname")
+                raise
+            except:
+                logger.exception("Failed to get trustname")
+
+            defer.returnValue(result["trustname"])          
 
     @defer.inlineCallbacks
     def collect_presencelike_data(self, user, state):

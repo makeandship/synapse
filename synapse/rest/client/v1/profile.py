@@ -86,7 +86,39 @@ class ProfileAvatarURLRestServlet(ClientV1RestServlet):
 
     def on_OPTIONS(self, request, user_id):
         return (200, {})
+        
+        
+class ProfileTrustNAMERestServlet(ClientV1RestServlet):
+    PATTERN = client_path_pattern("/profile/(?P<user_id>[^/]*)/trustname")
 
+    @defer.inlineCallbacks
+    def on_GET(self, request, user_id):
+        user = UserID.from_string(user_id)
+
+        trustname = yield self.handlers.profile_handler.get_trustname(
+            user,
+        )
+
+        defer.returnValue((200, {"trustname": trustname}))
+
+    @defer.inlineCallbacks
+    def on_PUT(self, request, user_id):
+        auth_user, client = yield self.auth.get_user_by_req(request)
+        user = UserID.from_string(user_id)
+
+        try:
+            content = json.loads(request.content.read())
+            new_name = content["trustname"]
+        except:
+            defer.returnValue((400, "Unable to parse name"))
+
+        yield self.handlers.profile_handler.set_trustname(
+            user, auth_user, new_name)
+
+        defer.returnValue((200, {}))
+
+    def on_OPTIONS(self, request, user_id):
+        return (200, {})
 
 class ProfileRestServlet(ClientV1RestServlet):
     PATTERN = client_path_pattern("/profile/(?P<user_id>[^/]*)")
@@ -101,14 +133,19 @@ class ProfileRestServlet(ClientV1RestServlet):
         avatar_url = yield self.handlers.profile_handler.get_avatar_url(
             user,
         )
+        trustname = yield self.handlers.profile_handler.get_trustname(
+            user,
+        )
 
         defer.returnValue((200, {
             "displayname": displayname,
-            "avatar_url": avatar_url
+            "avatar_url": avatar_url,
+            "trustname": trustname,
         }))
 
 
 def register_servlets(hs, http_server):
     ProfileDisplaynameRestServlet(hs).register(http_server)
     ProfileAvatarURLRestServlet(hs).register(http_server)
+    ProfileTrustNAMERestServlet(hs).register(http_server)
     ProfileRestServlet(hs).register(http_server)
