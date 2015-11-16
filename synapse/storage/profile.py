@@ -39,6 +39,22 @@ class ProfileStore(SQLBaseStore):
             updatevalues={"displayname": new_displayname},
             desc="set_profile_displayname",
         )
+        
+    def get_profile_trustname(self, user_localpart):
+        return self._simple_select_one_onecol(
+            table="profiles",
+            keyvalues={"user_id": user_localpart},
+            retcol="trustname",
+            desc="get_profile_trustname",
+        )
+
+    def set_profile_trustname(self, user_localpart, new_trustname):
+        return self._simple_update_one(
+            table="profiles",
+            keyvalues={"user_id": user_localpart},
+            updatevalues={"trustname": new_trustname},
+            desc="set_profile_trustname",
+        )    
 
     def get_profile_avatar_url(self, user_localpart):
         return self._simple_select_one_onecol(

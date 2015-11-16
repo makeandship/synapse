@@ -604,6 +604,17 @@ class SynapseCmd(cmd.Cmd):
             reactor.callFromThread(self._run_and_pprint, "PUT", path, data=data)
         else:
             reactor.callFromThread(self._run_and_pprint, "GET", path)
+    
+    def do_trustname(self, line):
+        """Get or set my trustname: "trustname [new_name]" """
+        args = self._parse(line, ["name"])
+        path = "/profile/%s/trustname" % (self.config["user"])
+
+        if "name" in args:
+            data = {"trustname": args["name"]}
+            reactor.callFromThread(self._run_and_pprint, "PUT", path, data=data)
+        else:
+            reactor.callFromThread(self._run_and_pprint, "GET", path)        
 
     def _do_presence_state(self, state, line):
         args = self._parse(line, ["msgstring"])

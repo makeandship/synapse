@@ -15,5 +15,6 @@
 CREATE TABLE IF NOT EXISTS profiles(
     user_id TEXT NOT NULL,
     displayname TEXT,
+	trustname TEXT,
     avatar_url TEXT
 );
