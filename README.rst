@@ -122,7 +122,7 @@ To install the synapse homeserver run::
     virtualenv -p python2.7 ~/.synapse
     source ~/.synapse/bin/activate
     pip install --upgrade setuptools
-    pip install --process-dependency-links https://github.com/matrix-org/synapse/tarball/master
+    pip install --process-dependency-links https://github.com/makeandship/synapse/tarball/master
 
 This installs synapse, along with the libraries it uses, into a virtual
 environment under ``~/.synapse``.  Feel free to pick a different directory
