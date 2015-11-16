@@ -177,7 +177,7 @@ class ProfileHandler(BaseHandler):
     @defer.inlineCallbacks
     def get_trustname(self, target_user):
         if self.hs.is_mine(target_user):
-            avatar_url = yield self.store.get_profile_trustname(
+            trustname = yield self.store.get_profile_trustname(
                 target_user.localpart
             )
 
@@ -206,16 +206,18 @@ class ProfileHandler(BaseHandler):
         if not self.hs.is_mine(user):
             defer.returnValue(None)
 
-        (displayname, avatar_url) = yield defer.gatherResults(
+        (displayname, avatar_url, trustname) = yield defer.gatherResults(
             [
                 self.store.get_profile_displayname(user.localpart),
                 self.store.get_profile_avatar_url(user.localpart),
+                self.store.get_profile_trustname(user.localpart),
             ],
             consumeErrors=True
         ).addErrback(unwrapFirstError)
 
         state["displayname"] = displayname
         state["avatar_url"] = avatar_url
+        state["trustname"] = trustname
 
         defer.returnValue(None)
 
@@ -238,6 +240,11 @@ class ProfileHandler(BaseHandler):
             response["avatar_url"] = yield self.store.get_profile_avatar_url(
                 user.localpart
             )
+            
+        if just_field is None or just_field == "trustname":
+            response["trustname"] = yield self.store.get_profile_trustname(
+                user.localpart
+            )    
 
         defer.returnValue(response)
 
